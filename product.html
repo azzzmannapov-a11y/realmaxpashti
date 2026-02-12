@@ -1,0 +1,225 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Продукт — Real Max</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="topbar">
+      <div class="container topbar-inner">
+        <div class="topbar-left">
+          <span class="topbar-phone">+998 90 000 00 00</span>
+          <span class="topbar-sep">•</span>
+          <a href="#" class="topbar-link" data-i18n="topbar_telegram">Написать в Telegram</a>
+        </div>
+        <div class="topbar-right">
+          <button class="lang-chip" data-lang="uz">Uz</button>
+          <button class="lang-chip active" data-lang="ru">Ru</button>
+          <button class="lang-chip" data-lang="en">En</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container header-inner">
+      <a class="logo" href="index.html" aria-label="Real Max">
+        <span class="logo-mark">R</span>
+        <span class="logo-text">Real Max</span>
+      </a>
+      <nav class="nav-main" aria-label="Main navigation">
+        <a class="nav-link" href="index.html" data-i18n="nav_home">Главная</a>
+        <a class="nav-link" href="about.html" data-i18n="nav_about">О компании</a>
+        <a class="nav-link nav-link-active" href="catalog.html" data-i18n="nav_catalog">Каталог</a>
+        <a class="nav-link" href="partners.html" data-i18n="nav_partners">Партнёры</a>
+        <a class="nav-link" href="contact.html" data-i18n="nav_contact">Связаться</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="product-page">
+    <div class="container product-page-inner">
+      <div class="product-gallery">
+        <img id="pImg" src="./images/real-max-logo.png" alt="Product image" />
+        <button type="button" class="product-gallery-prev" id="pImgPrev" aria-label="Previous image">‹</button>
+        <button type="button" class="product-gallery-next" id="pImgNext" aria-label="Next image">›</button>
+        <div class="product-gallery-dots" id="pImgDots" aria-label="Image indicators"></div>
+      </div>
+
+      <div class="product-info">
+        <a class="product-back" id="pBack" href="catalog.html">← Каталог</a>
+        <h1 id="pName">Продукт</h1>
+        <p class="product-desc" id="pDesc">Описание продукта</p>
+
+        <ul class="product-spec" id="pMeta"></ul>
+
+        <div class="product-cta">
+          <a class="btn btn-katalog" id="pCta1" href="contact.html">Связаться</a>
+          <a class="btn ghost" id="pCta2" href="catalog.html">Назад в каталог</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container text-center">
+      <h2 data-i18n="catalog_cta_title">Нужен полный каталог и цены?</h2>
+      <p data-i18n="catalog_cta_text">Оставьте заявку — мы отправим актуальный ассортимент и условия.</p>
+      <a href="./contact.html" class="btn btn-primary" data-i18n="catalog_cta_btn">Связаться</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p data-i18n="footer_copy">© Real Max, 2025. Все права защищены.</p>
+    </div>
+  </footer>
+
+  <script src="./script.js"></script>
+  <script src="./products.js"></script>
+  <script>
+    (function () {
+      if (!window.REALMAX_PRODUCTS) return;
+
+      const params = new URLSearchParams(window.location.search);
+      const productId = params.get("id") || "p1";
+      const product = window.REALMAX_PRODUCTS.find((p) => p.id === productId) || window.REALMAX_PRODUCTS[0];
+
+      const img = document.getElementById("pImg");
+      const imgPrev = document.getElementById("pImgPrev");
+      const imgNext = document.getElementById("pImgNext");
+      const imgDots = document.getElementById("pImgDots");
+      const name = document.getElementById("pName");
+      const desc = document.getElementById("pDesc");
+      const meta = document.getElementById("pMeta");
+      const cta1 = document.getElementById("pCta1");
+      const cta2 = document.getElementById("pCta2");
+      const back = document.getElementById("pBack");
+      let imageIndex = 0;
+      let isAnimating = false;
+
+      function getImages() {
+        if (!Array.isArray(product.images) || product.images.length === 0) {
+          return ["./images/real-max-logo.png"];
+        }
+        return product.images;
+      }
+
+      function renderDots() {
+        const images = getImages();
+        imgDots.innerHTML = images
+          .map((_, i) => `<button type="button" class="product-dot ${i === imageIndex ? "active" : ""}" data-i="${i}" aria-label="Go to image ${i + 1}"></button>`)
+          .join("");
+      }
+
+      function setImage(nextIndex, direction) {
+        const images = getImages();
+        if (images.length === 0) return;
+        if (isAnimating) return;
+
+        let normalized = nextIndex;
+        if (normalized >= images.length) normalized = 0;
+        if (normalized < 0) normalized = images.length - 1;
+
+        if (normalized === imageIndex && img.src.includes(images[normalized])) {
+          renderDots();
+          return;
+        }
+
+        if (!direction) {
+          imageIndex = normalized;
+          img.src = images[imageIndex];
+          renderDots();
+          return;
+        }
+
+        isAnimating = true;
+        const outClass = direction === "next" ? "slide-out-left" : "slide-out-right";
+        const inClass = direction === "next" ? "slide-in-right" : "slide-in-left";
+
+        img.classList.remove("slide-out-left", "slide-out-right", "slide-in-left", "slide-in-right");
+        img.classList.add(outClass);
+
+        setTimeout(() => {
+          imageIndex = normalized;
+          img.src = images[imageIndex];
+          img.classList.remove(outClass);
+          img.classList.add(inClass);
+          renderDots();
+
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              img.classList.remove(inClass);
+              setTimeout(() => {
+                isAnimating = false;
+              }, 220);
+            });
+          });
+        }, 220);
+      }
+
+      function lang() {
+        const saved = localStorage.getItem("realmax_lang");
+        return saved && product[saved] ? saved : "ru";
+      }
+
+      function render() {
+        const l = lang();
+        const t = product[l] || product.ru;
+        const m = t.meta;
+
+        imageIndex = 0;
+        setImage(0);
+        img.alt = t.name;
+        const many = getImages().length > 1;
+        imgNext.style.display = many ? "inline-flex" : "none";
+        imgPrev.style.display = many ? "inline-flex" : "none";
+        imgDots.style.display = many ? "flex" : "none";
+        name.textContent = t.name;
+        desc.textContent = t.desc;
+
+        const metaRows = Object.keys(m)
+          .filter((key) => /^k\d+$/.test(key))
+          .sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)))
+          .map((kKey) => {
+            const idx = kKey.slice(1);
+            const vKey = `v${idx}`;
+            return `<li><span>${m[kKey]}:</span> ${m[vKey] || "-"}</li>`;
+          })
+          .join("");
+
+        const priceLabel = l === "uz" ? "Narx" : l === "en" ? "Price" : "Cena";
+        meta.innerHTML = `${metaRows}<li><span>${priceLabel}:</span> ${product.price_uzs.toLocaleString("ru-RU")} UZS</li>`;
+
+        cta1.textContent = t.cta1;
+        cta2.textContent = t.cta2;
+        back.textContent = `← ${t.cta2}`;
+        document.title = `${t.name} — Real Max`;
+      }
+
+      render();
+      imgPrev.addEventListener("click", () => {
+        const images = getImages();
+        if (images.length < 2) return;
+        setImage(imageIndex - 1, "prev");
+      });
+      imgNext.addEventListener("click", () => {
+        const images = getImages();
+        if (images.length < 2) return;
+        setImage(imageIndex + 1, "next");
+      });
+      imgDots.addEventListener("click", (e) => {
+        const btn = e.target.closest(".product-dot");
+        if (!btn) return;
+        const targetIndex = Number(btn.dataset.i || 0);
+        const dir = targetIndex > imageIndex ? "next" : "prev";
+        setImage(targetIndex, targetIndex === imageIndex ? null : dir);
+      });
+      document.querySelectorAll(".lang-chip").forEach((btn) => {
+        btn.addEventListener("click", () => setTimeout(render, 0));
+      });
+    })();
+  </script>
+</body>
+</html>

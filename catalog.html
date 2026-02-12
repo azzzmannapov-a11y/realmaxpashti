@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="catalog_page_title">Каталог продукции — Real Max</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="topbar">
+      <div class="container topbar-inner">
+        <div class="topbar-left">
+          <span class="topbar-phone">+998 90 000 00 00</span>
+          <span class="topbar-sep">•</span>
+          <a href="#" class="topbar-link" data-i18n="topbar_telegram">Написать в Telegram</a>
+        </div>
+        <div class="topbar-right">
+          <button class="lang-chip" data-lang="uz">Uz</button>
+          <button class="lang-chip active" data-lang="ru">Ru</button>
+          <button class="lang-chip" data-lang="en">En</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container header-inner">
+      <a class="logo" href="index.html" aria-label="Real Max">
+        <span class="logo-mark">R</span>
+        <span class="logo-text">Real Max</span>
+      </a>
+      <nav class="nav-main" aria-label="Main navigation">
+        <a class="nav-link" href="index.html" data-i18n="nav_home">Главная</a>
+        <a class="nav-link" href="about.html" data-i18n="nav_about">О компании</a>
+        <a class="nav-link nav-link-active" href="catalog.html" data-i18n="nav_catalog">Каталог</a>
+        <a class="nav-link" href="partners.html" data-i18n="nav_partners">Партнёры</a>
+        <a class="nav-link" href="contact.html" data-i18n="nav_contact">Связаться</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header" style="text-align:left; margin-bottom:14px;">
+        <h2 data-i18n="catalog_products_title">Популярные позиции</h2>
+        <p data-i18n="catalog_products_sub">Нажмите на карточку, чтобы посмотреть детали по конкретному продукту.</p>
+      </div>
+      <div id="catalogGrid" class="product-grid"></div>
+    </div>
+  </section>
+
+  <section class="section section-alt">
+    <div class="container text-center">
+      <h2 data-i18n="catalog_cta_title">Нужен полный каталог и цены?</h2>
+      <p data-i18n="catalog_cta_text">Оставьте заявку — мы отправим актуальный ассортимент и условия.</p>
+      <a href="./contact.html" class="btn btn-primary" data-i18n="catalog_cta_btn">Связаться</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p data-i18n="footer_copy">© Real Max, 2025. Все права защищены.</p>
+    </div>
+  </footer>
+
+  <script src="./script.js"></script>
+  <script src="./products.js"></script>
+  <script>
+    (function () {
+      const grid = document.getElementById("catalogGrid");
+      if (!grid || !window.REALMAX_PRODUCTS) return;
+
+      const ui = {
+        uz: { hit: "Hit", more: "Batafsil →" },
+        ru: { hit: "Хит", more: "Подробнее →" },
+        en: { hit: "Hit", more: "View more →" }
+      };
+
+      function getLang() {
+        const saved = localStorage.getItem("realmax_lang");
+        return saved && ui[saved] ? saved : "ru";
+      }
+
+      function renderCatalog() {
+        const lang = getLang();
+        const labels = ui[lang];
+
+        grid.innerHTML = window.REALMAX_PRODUCTS.map((product, idx) => {
+          const t = product[lang] || product.ru;
+          const badge = idx % 7 === 0 ? `<div class="product-badge">${labels.hit}</div>` : "";
+          return `
+            <a class="product-card" href="product.html?id=${product.id}">
+              ${badge}
+              <div class="product-img">
+                <img src="${product.images[0]}" alt="${t.name}">
+              </div>
+              <div class="product-body">
+                <h3>${t.name}</h3>
+                <p class="product-cat">${t.category}</p>
+                <p class="product-price">${product.price_uzs.toLocaleString("ru-RU")} UZS</p>
+                <span class="news-link">${labels.more}</span>
+              </div>
+            </a>
+          `;
+        }).join("");
+      }
+
+      renderCatalog();
+      document.querySelectorAll(".lang-chip").forEach((btn) => {
+        btn.addEventListener("click", () => setTimeout(renderCatalog, 0));
+      });
+    })();
+  </script>
+</body>
+</html>
